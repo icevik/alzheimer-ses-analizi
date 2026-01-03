@@ -24,6 +24,7 @@ router = APIRouter()
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
+    has_consented: bool
 
 
 class VerifyRegisterRequest(BaseModel):
@@ -50,6 +51,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     is_verified: bool
+    has_consented: bool
     created_at: datetime
 
     class Config:
@@ -76,6 +78,12 @@ async def register(
     db: AsyncSession = Depends(get_db)
 ):
     """Yeni kullanıcı kaydı - email doğrulama kodu gönderir"""
+    if not data.has_consented:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kayıt olmak için Kullanıcı Sözleşmesi ve KVKK metnini onaylamanız gerekmektedir."
+        )
+
     client_ip = get_client_ip(request)
     email = data.email.lower()
     
@@ -127,7 +135,9 @@ async def register(
         user = User(
             email=email,
             password_hash=hash_password(data.password),
-            is_verified=False
+            is_verified=False,
+            has_consented=True,
+            consent_date=datetime.now(timezone.utc)
         )
         db.add(user)
         await db.commit()

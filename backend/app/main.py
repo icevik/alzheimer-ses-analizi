@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import participants, analyze, results, reports, auth
 from app.core.database import engine, Base
+from app.core.config import settings
 from app.models import User, EmailVerification, RateLimit, Participant, Analysis
 
 app = FastAPI(
@@ -10,9 +11,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Parse CORS origins from settings
+if settings.cors_enabled:
+    allowed_origins = [origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()]
+else:
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

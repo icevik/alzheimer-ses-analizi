@@ -7,6 +7,8 @@ export interface Participant {
   gender: string
   group_type: 'alzheimer' | 'mci' | 'control'
   mmse_score: number | null
+  has_consented: boolean
+  consent_date: string | null
   created_at: string
 }
 
@@ -16,6 +18,7 @@ export interface ParticipantCreate {
   gender: string
   group_type: 'alzheimer' | 'mci' | 'control'
   mmse_score?: number | null
+  has_consented: boolean
 }
 
 export const getParticipants = async (): Promise<Participant[]> => {

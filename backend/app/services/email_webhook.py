@@ -16,6 +16,7 @@ async def send_verification_email(email: str, code: str) -> bool:
             response = await client.post(
                 settings.email_webhook_url,
                 json={
+                    "to": email,
                     "email": email,
                     "code": code
                 }

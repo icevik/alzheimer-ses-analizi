@@ -18,14 +18,36 @@ from io import BytesIO
 from app.core.config import settings
 
 # Türkçe karakter destekli fontları kaydet
-FONT_PATH = "/usr/share/fonts/truetype/dejavu/"
-try:
-    pdfmetrics.registerFont(TTFont('DejaVu', os.path.join(FONT_PATH, 'DejaVuSans.ttf')))
-    pdfmetrics.registerFont(TTFont('DejaVu-Bold', os.path.join(FONT_PATH, 'DejaVuSans-Bold.ttf')))
-    TURKISH_FONT = 'DejaVu'
-    TURKISH_FONT_BOLD = 'DejaVu-Bold'
-except Exception as e:
-    print(f"Font yüklenemedi, varsayılan font kullanılacak: {e}")
+FONT_PATHS = [
+    "/usr/share/fonts/truetype/dejavu/",
+    "C:\\Windows\\Fonts\\",
+    "/System/Library/Fonts/",
+    "/Library/Fonts/"
+]
+
+font_registered = False
+for font_path in FONT_PATHS:
+    try:
+        if os.path.exists(os.path.join(font_path, 'DejaVuSans.ttf')):
+            pdfmetrics.registerFont(TTFont('DejaVu', os.path.join(font_path, 'DejaVuSans.ttf')))
+            pdfmetrics.registerFont(TTFont('DejaVu-Bold', os.path.join(font_path, 'DejaVuSans-Bold.ttf')))
+            TURKISH_FONT = 'DejaVu'
+            TURKISH_FONT_BOLD = 'DejaVu-Bold'
+            font_registered = True
+            break
+        elif os.path.exists(os.path.join(font_path, 'Arial.ttf')):
+            # Windows fallback for Turkish support if DejaVu is missing
+            pdfmetrics.registerFont(TTFont('Arial', os.path.join(font_path, 'Arial.ttf')))
+            pdfmetrics.registerFont(TTFont('Arial-Bold', os.path.join(font_path, 'arialbd.ttf')))
+            TURKISH_FONT = 'Arial'
+            TURKISH_FONT_BOLD = 'Arial-Bold'
+            font_registered = True
+            break
+    except Exception as e:
+        continue
+
+if not font_registered:
+    print("Türkçe font yüklenemedi, varsayılan font kullanılacak.")
     TURKISH_FONT = 'Helvetica'
     TURKISH_FONT_BOLD = 'Helvetica-Bold'
 
@@ -70,6 +92,13 @@ class ReportService:
     ) -> str:
         """PDF rapor oluştur"""
         
+        # None kontrolü ve varsayılan değerler
+        acoustic_features = acoustic_features or {}
+        advanced_acoustic = advanced_acoustic or {}
+        linguistic_analysis = linguistic_analysis or {}
+        emotion_analysis = emotion_analysis or {}
+        content_analysis = content_analysis or {}
+
         # Dosya adı
         file_name = f"Knowhy_Rapor_{uuid.uuid4().hex[:8]}.pdf"
         file_path = os.path.join(settings.reports_dir, file_name)
@@ -315,15 +344,25 @@ class ReportService:
             story.append(Spacer(1, 0.1*inch))
             
             # Markdown'ı temizle ve HTML'e dönüştür
-            cleaned_report = self._convert_markdown_to_html(gemini_report)
+            # Markdown'ı temizle ve HTML'e dönüştür
+            # Önce paragraflara böl
+            import re
             
-            # Gemini raporunu paragraflara böl
-            paragraphs = cleaned_report.split('\n\n')
+            # Gereksiz boşlukları temizle
+            text = gemini_report
+            text = re.sub(r'\n{3,}', '\n\n', text)
+            
+            paragraphs = text.split('\n\n')
+            
             for para in paragraphs:
                 if para.strip():
+                    # Markdown'ı bu paragraf için HTML'e çevir
+                    cleaned_para = self._convert_markdown_to_html(para.strip())
+                    
                     # Başlıkları tespit et (# ile başlayan veya tamamen büyük harf)
-                    stripped = para.strip()
-                    if stripped.startswith('#') or (len(stripped) > 3 and stripped.replace(' ', '').replace('.', '').replace(')', '').replace('(', '').isupper()):
+                    # Not: convert_markdown_to_html içinde # temizlenmiyor olabilir
+                    raw_text = para.strip()
+                    if raw_text.startswith('#') or (len(raw_text) > 3 and raw_text.replace(' ', '').replace('.', '').replace(')', '').replace('(', '').isupper()):
                         section_style = ParagraphStyle(
                             'SectionTitle',
                             parent=styles['Heading3'],
@@ -333,11 +372,11 @@ class ReportService:
                             spaceBefore=15,
                             spaceAfter=8
                         )
-                        # # işaretlerini temizle
-                        clean_title = stripped.lstrip('#').strip()
+                        # # işaretlerini, ** işaretlerini temizle (başlık olduğu için bold gereksiz olabilir veya stil zaten bold)
+                        clean_title = raw_text.lstrip('#').replace('*', '').strip()
                         story.append(Paragraph(clean_title, section_style))
                     else:
-                        story.append(Paragraph(stripped, normal_style))
+                        story.append(Paragraph(cleaned_para, normal_style))
         
         # ===== REPORT SONU =====
         story.append(Spacer(1, 1*inch))

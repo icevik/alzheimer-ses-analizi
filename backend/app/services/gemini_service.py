@@ -98,7 +98,8 @@ Lütfen aşağıdaki bölümleri içeren profesyonel bir klinik rapor hazırla:
    - Takip önerileri
    - Önerilen müdahaleler
 
-Raporu Türkçe, bilimsel ve profesyonel bir dille yaz. Metrikleri yorumla ve klinik önemlerini açıkla."""
+Raporu Türkçe, bilimsel ve profesyonel bir dille yaz. Metrikleri yorumla ve klinik önemlerini açıkla.
+RAPORUN SONUNA İMZA, UZMAN ADI, TARİH VEYA KAPANIŞ İFADESİ EKLEME. Sadece içerik yaz."""
 
         def _generate():
             try:

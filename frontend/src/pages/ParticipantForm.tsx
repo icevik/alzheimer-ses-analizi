@@ -12,6 +12,7 @@ export default function ParticipantForm() {
     gender: '',
     group_type: 'control',
     mmse_score: null,
+    has_consented: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -216,6 +217,38 @@ export default function ParticipantForm() {
           </div>
         </div>
 
+        {/* Veri İşleme ve Gizlilik Onayı - KVKK */}
+        <div className="form-section consent-section">
+          <h3 className="form-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '20px', height: '20px', marginRight: '8px' }}>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Veri İşleme ve Gizlilik Onayı
+            <span className="required-mark">*</span>
+          </h3>
+
+          <div className="consent-text-box">
+            <p><strong>Aydınlatma Metni</strong></p>
+            <p>Ses kayıtlarınız ve klinik verileriniz (yaş, cinsiyet, MMSE skoru), yapay zeka modelleri kullanılarak hastalık tespiti ve analizi amacıyla işlenecektir.</p>
+            <p><strong>Verilerin Yurt Dışına Aktarımı:</strong> Analiz süreçlerinin gerçekleştirilebilmesi için toplanan anonimleştirilmiş ses verileri ve ilgili klinik veriler:</p>
+            <ul>
+              <li>OpenAI (ABD) ve/veya Google (ABD) gibi yurt dışında bulunan sunuculara aktarılabilir.</li>
+              <li>Üçüncü taraf yapay zeka servis sağlayıcıları ile paylaşılabilir.</li>
+            </ul>
+            <p>Bu paylaşım, yalnızca analiz hizmetinin sağlanması amacıyla sınırlı olup, verileriniz teknik güvenlik tedbirleri ile korunmaktadır.</p>
+          </div>
+
+          <label className="consent-checkbox-label">
+            <input
+              type="checkbox"
+              checked={formData.has_consented}
+              onChange={(e) => setFormData({ ...formData, has_consented: e.target.checked })}
+              required
+            />
+            <span>Yukarıdaki aydınlatma metnini okudum, anladım. Kişisel verilerimin, özellikle ses kaydımın, proje kapsamında analiz edilmesine, yurt dışındaki sunucularda işlenmesine ve üçüncü taraf yapay zeka hizmet sağlayıcıları ile paylaşılmasına <strong>açık rıza gösteriyorum.</strong></span>
+          </label>
+        </div>
+
         <div className="submit-section">
           <button
             type="button"
@@ -226,7 +259,7 @@ export default function ParticipantForm() {
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !formData.has_consented}
             className={`btn btn-primary ${loading ? 'btn-loading' : ''}`}
           >
             {!loading && (

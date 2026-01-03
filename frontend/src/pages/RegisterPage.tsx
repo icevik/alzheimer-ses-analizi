@@ -14,6 +14,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
+    const [hasConsented, setHasConsented] = useState(false)
     const [verificationCode, setVerificationCode] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
@@ -37,7 +38,7 @@ export default function RegisterPage() {
         setIsLoading(true)
 
         try {
-            const response = await register(email, password)
+            const response = await register(email, password, hasConsented)
             setMessage(response.message)
             setStep('verification')
         } catch (err: any) {
@@ -55,7 +56,7 @@ export default function RegisterPage() {
 
         try {
             const response = await verifyRegister(email, verificationCode)
-            authLogin(response.access_token)
+            await authLogin(response.access_token)
             navigate('/')
         } catch (err: any) {
             const detail = err.response?.data?.detail || 'Doğrulama başarısız'
@@ -117,9 +118,27 @@ export default function RegisterPage() {
                             />
                         </div>
 
+                        <div className="form-group checkbox-group">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    id="consent"
+                                    checked={hasConsented}
+                                    onChange={(e) => setHasConsented(e.target.checked)}
+                                    required
+                                />
+                                <span>
+                                    Kişisel verilerimin KNOWHY Alzheimer Analiz Projesi kapsamında işlenmesine,
+                                    yurt dışındaki sunuculara ve (OpenAI, Google) aktarılmasına ve
+                                    üçüncü taraf yapay zeka hizmet sağlayıcıları ile paylaşılmasına
+                                    açık rıza veriyorum.
+                                </span>
+                            </label>
+                        </div>
+
                         {error && <div className="auth-error">{error}</div>}
 
-                        <button type="submit" className="auth-button" disabled={isLoading}>
+                        <button type="submit" className="auth-button" disabled={isLoading || !hasConsented}>
                             {isLoading ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
                         </button>
                     </form>

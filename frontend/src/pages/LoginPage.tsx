@@ -42,7 +42,7 @@ export default function LoginPage() {
 
         try {
             const response = await verifyLogin(email, verificationCode)
-            authLogin(response.access_token)
+            await authLogin(response.access_token)
             navigate('/')
         } catch (err: any) {
             const detail = err.response?.data?.detail || 'Doğrulama başarısız'

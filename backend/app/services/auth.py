@@ -61,9 +61,12 @@ async def create_verification_code(
     db: AsyncSession, 
     email: str, 
     verification_type: VerificationType,
-    expires_minutes: int = 10
+    expires_minutes: int | None = None
 ) -> str:
     """Doğrulama kodu oluştur ve kaydet"""
+    if expires_minutes is None:
+        expires_minutes = settings.verification_code_expire_minutes
+
     # Eski kodları sil
     await db.execute(
         delete(EmailVerification).where(

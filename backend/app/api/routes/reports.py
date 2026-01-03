@@ -1,4 +1,5 @@
 import os
+import traceback
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -130,14 +131,59 @@ async def download_report_pdf(
     if not analysis:
         raise HTTPException(status_code=404, detail="Analiz bulunamadı veya erişim izniniz yok")
     
-    if not analysis.report_pdf_path or not os.path.exists(analysis.report_pdf_path):
-        raise HTTPException(
-            status_code=404, 
-            detail="PDF raporu bulunamadı. Lütfen analizi tekrar çalıştırın."
-        )
+    # PDF dosyası var mı kontrol et
+    file_path = analysis.report_pdf_path
+    
+    if not file_path or not os.path.exists(file_path):
+        # PDF yoksa oluştur
+        try:
+            from app.services.report_service import report_service
+            
+            # Katılımcıyı bul
+            result_participant = await db.execute(
+                select(Participant).where(Participant.id == analysis.participant_id)
+            )
+            participant = result_participant.scalar_one_or_none()
+            
+            if not participant:
+                raise HTTPException(status_code=404, detail="Katılımcı bilgisi bulunamadı")
+                
+            participant_info = {
+                "name": participant.name,
+                "age": participant.age,
+                "gender": participant.gender,
+                "group_type": participant.group_type.value,
+                "mmse_score": participant.mmse_score
+            }
+            
+            # PDF oluştur
+            new_file_path = report_service.create_pdf_report(
+                participant_info=participant_info,
+                transcript=analysis.transcript,
+                acoustic_features=analysis.acoustic_features,
+                advanced_acoustic=analysis.advanced_acoustic,
+                linguistic_analysis=analysis.linguistic_analysis,
+                emotion_analysis=analysis.emotion_analysis,
+                content_analysis=analysis.content_analysis,
+                gemini_report=analysis.gemini_report
+            )
+            
+            # DB güncelle
+            analysis.report_pdf_path = new_file_path
+            await db.commit()
+            
+            file_path = new_file_path
+            
+        except Exception as e:
+            print(f"PDF oluşturma hatası: {e}")
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=500, 
+                detail=f"PDF raporu oluşturulurken hata: {str(e)}"
+            )
     
     return FileResponse(
-        analysis.report_pdf_path,
+        file_path,
         media_type="application/pdf",
         filename=f"rapor_{analysis_id}.pdf"
     )

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from app.core.database import get_db
 from app.models.participant import Participant, GroupType
@@ -18,6 +18,7 @@ class ParticipantCreate(BaseModel):
     gender: str
     group_type: GroupType
     mmse_score: int | None = None
+    has_consented: bool  # Required field - must be True to proceed
 
 
 class ParticipantResponse(BaseModel):
@@ -27,6 +28,8 @@ class ParticipantResponse(BaseModel):
     gender: str
     group_type: str
     mmse_score: int | None
+    has_consented: bool
+    consent_date: datetime | None
     created_at: datetime
     
     class Config:
@@ -39,9 +42,20 @@ async def create_participant(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Validate consent
+    if not participant.has_consented:
+        raise HTTPException(
+            status_code=400,
+            detail="Katılımcı kaydı için veri işleme onayı gereklidir."
+        )
+    
+    participant_data = participant.dict()
+    # Set consent_date when consent is given
+    participant_data["consent_date"] = datetime.now(timezone.utc)
+    
     db_participant = Participant(
         user_id=current_user.id,
-        **participant.dict()
+        **participant_data
     )
     db.add(db_participant)
     await db.commit()

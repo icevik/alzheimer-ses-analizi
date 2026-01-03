@@ -6,7 +6,7 @@ interface AuthContextType {
     token: string | null
     isAuthenticated: boolean
     isLoading: boolean
-    login: (token: string) => void
+    login: (token: string) => Promise<void>
     logout: () => void
     refreshUser: () => Promise<void>
 }
@@ -40,10 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshUser()
     }, [])
 
-    const login = (newToken: string) => {
+    const login = async (newToken: string) => {
         localStorage.setItem('token', newToken)
         setToken(newToken)
-        refreshUser()
+        await refreshUser()
     }
 
     const logout = () => {

@@ -9,6 +9,7 @@ export interface UserResponse {
     id: number
     email: string
     is_verified: boolean
+    has_consented: boolean
     created_at: string
 }
 
@@ -18,8 +19,8 @@ export interface MessageResponse {
 }
 
 // Register
-export const register = async (email: string, password: string): Promise<MessageResponse> => {
-    const response = await client.post('/api/auth/register', { email, password })
+export const register = async (email: string, password: string, has_consented: boolean): Promise<MessageResponse> => {
+    const response = await client.post('/api/auth/register', { email, password, has_consented })
     return response.data
 }
 

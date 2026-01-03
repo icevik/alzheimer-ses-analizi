@@ -1,12 +1,26 @@
 from pydantic_settings import BaseSettings
 import os
+from urllib.parse import quote_plus
 
 
 class Settings(BaseSettings):
-    database_url: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql+asyncpg://voiceanalyzer:voiceanalyzer_pass@postgres:5432/voiceanalyzer_db",
-    )
+    # Database settings from env
+    postgres_user: str = os.getenv("POSTGRES_USER", "knowhy")
+    postgres_password: str = os.getenv("POSTGRES_PASSWORD", "knowhy_pass")
+    postgres_db: str = os.getenv("POSTGRES_DB", "knowhy_db")
+    postgres_host: str = os.getenv("POSTGRES_HOST", "postgres")
+    postgres_port: str = os.getenv("POSTGRES_PORT", "5432")
+
+    @property
+    def database_url(self) -> str:
+        # Check if explicit URL is set
+        url = os.getenv("DATABASE_URL")
+        if url:
+             return url
+        
+        # Otherwise construct safely
+        password_encoded = quote_plus(self.postgres_password)
+        return f"postgresql+asyncpg://{self.postgres_user}:{password_encoded}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
 
     # OpenAI
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
@@ -42,6 +56,16 @@ class Settings(BaseSettings):
     account_lock_minutes: int = int(os.getenv("ACCOUNT_LOCK_MINUTES", "60"))
     max_failed_attempts_before_lock: int = int(os.getenv("MAX_FAILED_ATTEMPTS_BEFORE_LOCK", "10"))
     
+    # Verification Code
+    verification_code_expire_minutes: int = int(os.getenv("VERIFICATION_CODE_EXPIRE_MINUTES", "3"))
+    
+    # CORS
+    cors_enabled: bool = os.getenv("CORS_ENABLED", "True").lower() == "true"
+    cors_origins: str = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173"
+    )
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -49,5 +73,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-

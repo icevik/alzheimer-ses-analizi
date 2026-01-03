@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -21,6 +21,8 @@ class Participant(Base):
     gender = Column(String, nullable=False)
     group_type = Column(Enum(GroupType), nullable=False)
     mmse_score = Column(Integer, nullable=True)
+    has_consented = Column(Boolean, nullable=False, default=False)
+    consent_date = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     user = relationship("User", back_populates="participants")

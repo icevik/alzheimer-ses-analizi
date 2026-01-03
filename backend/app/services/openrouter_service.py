@@ -253,7 +253,8 @@ Lütfen aşağıdaki bölümleri içeren profesyonel, bilimsel ve detaylı bir k
 - Grup tipine (Alzheimer/MCI/Kontrol) özel değerlendirme yap
 - Önerileri somut ve uygulanabilir şekilde sun
 - Raporu net, anlaşılır ve yapılandırılmış bir formatta yaz
-- Her bölümü detaylı ve kapsamlı şekilde ele al"""
+- Her bölümü detaylı ve kapsamlı şekilde ele al
+- RAPORUN SONUNA İMZA, UZMAN ADI, TARİH VEYA KAPANIŞ İFADESİ EKLEME. Sadece içerik yaz."""
 
 
 openrouter_service = OpenRouterService()

@@ -14,6 +14,11 @@ class User(Base):
     is_locked = Column(Boolean, default=False, nullable=False)
     locked_until = Column(DateTime(timezone=True), nullable=True)
     failed_login_attempts = Column(Integer, default=0, nullable=False)
+    
+    # KVKK Consent
+    has_consented = Column(Boolean, default=False, nullable=False)
+    consent_date = Column(DateTime(timezone=True), nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     participants = relationship("Participant", back_populates="user")
