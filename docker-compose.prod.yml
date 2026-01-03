@@ -1,0 +1,27 @@
+version: '3.8'
+
+# Production overrides - use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+services:
+  backend:
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment:
+      ENVIRONMENT: production
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  frontend:
+    command: sh -c "npm run build && npm run preview -- --host 0.0.0.0 --port 3000"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M

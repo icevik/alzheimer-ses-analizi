@@ -17,6 +17,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
   backend:
     build:
@@ -32,10 +40,19 @@ services:
     volumes:
       - ./backend:/app
       - audio_uploads:/app/uploads
+      - reports_data:/app/reports
     depends_on:
       postgres:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   frontend:
     build:
@@ -53,10 +70,19 @@ services:
       - backend
     stdin_open: true
     tty: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
 volumes:
   postgres_data:
     name: knowhy_postgres_data
   audio_uploads:
     name: knowhy_audio_uploads
-
+  reports_data:
+    name: knowhy_reports_data
