@@ -28,6 +28,8 @@ export default function LoginPage() {
             setMessage(response.message)
             setStep('verification')
         } catch (err: any) {
+            console.error('[Login Error]', err)
+            console.error('[Login Error Response]', err.response)
             const detail = err.response?.data?.detail || 'Giriş başarısız'
             setError(detail)
         } finally {
@@ -45,6 +47,8 @@ export default function LoginPage() {
             await authLogin(response.access_token)
             navigate('/')
         } catch (err: any) {
+            console.error('[Verify Error]', err)
+            console.error('[Verify Error Response]', err.response)
             const detail = err.response?.data?.detail || 'Doğrulama başarısız'
             setError(detail)
         } finally {

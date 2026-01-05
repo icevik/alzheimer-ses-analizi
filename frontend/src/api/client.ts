@@ -2,8 +2,12 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+const normalizeBaseUrl = (url: string): string => {
+  return url.replace(/\/api\/?$/, '')
+}
+
 const client = axios.create({
-  baseURL: API_URL,
+  baseURL: normalizeBaseUrl(API_URL),
   headers: {
     'Content-Type': 'application/json',
   },

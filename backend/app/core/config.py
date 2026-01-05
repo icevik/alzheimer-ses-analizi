@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # Database settings from env
     postgres_user: str = os.getenv("POSTGRES_USER", "knowhy")
     postgres_password: str = os.getenv("POSTGRES_PASSWORD", "knowhy_pass")
-    postgres_db: str = os.getenv("POSTGRES_DB", "knowhy_db")
+    postgres_db: str = os.getenv("POSTGRES_DB", "knowhy")
     postgres_host: str = os.getenv("POSTGRES_HOST", "postgres")
     postgres_port: str = os.getenv("POSTGRES_PORT", "5432")
 

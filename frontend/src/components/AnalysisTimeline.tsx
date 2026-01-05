@@ -21,6 +21,10 @@ interface AnalysisTimelineProps {
   onComplete?: () => void
 }
 
+const normalizeBaseUrl = (url: string): string => {
+  return url.replace(/\/api\/?$/, '')
+}
+
 const DEFAULT_STEPS: Step[] = [
   { step: 1, title: "Dosya Yükleme", description: "Ses dosyası yükleniyor..." },
   { step: 2, title: "Akustik Analiz", description: "Temel akustik özellikler çıkarılıyor..." },
@@ -44,7 +48,7 @@ export default function AnalysisTimeline({ progressId, isAnalyzing, onComplete }
       return
     }
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:8000')
     const eventSource = new EventSource(`${API_URL}/api/analyze/progress/${progressId}/stream`)
 
     eventSource.onmessage = (event) => {
@@ -80,7 +84,7 @@ export default function AnalysisTimeline({ progressId, isAnalyzing, onComplete }
 
     const pollProgress = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+        const API_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:8000')
         const response = await fetch(`${API_URL}/api/analyze/progress/${progressId}`)
         if (response.ok) {
           const data = await response.json()

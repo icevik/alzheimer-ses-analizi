@@ -20,3 +20,10 @@ uploads/
 .DS_Store
 reports/
 RAILWAY_DEPLOYMENT.md
+nginx/
+certbot/
+init-letsencrypt.sh
+SSL-KURULUM.md
+
+plan.md
+plan.md

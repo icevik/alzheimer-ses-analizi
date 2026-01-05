@@ -19,21 +19,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true)
 
     const refreshUser = async () => {
-        const storedToken = localStorage.getItem('token')
-        if (storedToken) {
-            try {
-                const userData = await getCurrentUser()
-                setUser(userData)
-                setToken(storedToken)
-            } catch (error) {
-                // Token geçersiz
-                localStorage.removeItem('token')
-                localStorage.removeItem('user')
-                setUser(null)
-                setToken(null)
+        try {
+            const storedToken = localStorage.getItem('token')
+            if (storedToken) {
+                try {
+                    const userData = await getCurrentUser()
+                    setUser(userData)
+                    setToken(storedToken)
+                } catch (error) {
+                    // Token geçersiz
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('user')
+                    setUser(null)
+                    setToken(null)
+                }
             }
+        } finally {
+            setIsLoading(false)
         }
-        setIsLoading(false)
     }
 
     useEffect(() => {
