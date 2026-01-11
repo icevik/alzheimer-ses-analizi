@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollToTop from './components/ScrollToTop'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import ParticipantForm from './pages/ParticipantForm'
@@ -13,6 +14,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />

@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import HistoryModal from './HistoryModal'
+import OnboardingModal from './OnboardingModal'
 import { useAuth } from '../context/AuthContext'
 import './Layout.css'
 
@@ -13,6 +14,15 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [showHistory, setShowHistory] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const hasCompletedOnboarding = localStorage.getItem('onboarding_completed')
+    if (!hasCompletedOnboarding) {
+      setShowOnboarding(true)
+    }
+  }, [])
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/'
@@ -132,6 +142,17 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
           </div>
           <div className="topbar-right">
+            <button
+              className="topbar-btn tutorial-btn"
+              title="Rehber"
+              onClick={() => setShowOnboarding(true)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" x2="12.01" y1="17" y2="17" />
+              </svg>
+            </button>
             <button className="topbar-btn" title="Bildirimler">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -171,6 +192,11 @@ export default function Layout({ children }: LayoutProps) {
           setShowHistory(false)
           navigate(`/results/${analysisId}`)
         }}
+      />
+
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
       />
     </div>
   )
